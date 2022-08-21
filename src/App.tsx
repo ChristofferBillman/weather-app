@@ -4,6 +4,7 @@ import './styles/Type.css'
 import { useState, useEffect } from 'react'
 
 import DataPoint from './components/DataPoint'
+import WeatherData from './WeatherData'
 
 import useFetch from './hooks/useFetch'
 
@@ -12,38 +13,39 @@ import Humidity from './icons/humidity.svg'
 import Waterdrop from './icons/waterdrop.svg'
 import Wind from './icons/wind.svg'
 
-import * as MockData from './MockData.json'
+import * as MockDataUntyped from './MockData.json'
+const MockData: WeatherData | undefined = MockDataUntyped
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const APIKEY = '1a87f44fa0405437594d18b5815bcaa8'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UMEA = '63.826867812391846, 20.263559761339305'
 
-const DataPointProps = [
-	{
-		data: '20',
-		label: 'Temperature',
-		icon: Thermostat,
-	},
-	{
-		data: '0',
-		label: 'Humidity',
-		icon: Humidity,
-	}, {
-		data: '0',
-		label: 'Preciptation',
-		icon: Waterdrop,
-	},
-	{
-		data: '0',
-		label: 'Wind',
-		icon: Wind,
-	}
-]
-
 export default function App() {
 
 	const [weatherData, loading, error] = getMockData()
+
+	const DataPointProps = [
+		{
+			data: weatherData?.current.temp as number + '°C',
+			label: 'Temperature',
+			icon: Thermostat,
+		},
+		{
+			data: weatherData?.current.humidity + '%',
+			label: 'Humidity',
+			icon: Humidity,
+		}, {
+			data: weatherData?.daily[0].rain + 'mm',
+			label: 'Preciptation',
+			icon: Waterdrop,
+		},
+		{
+			data: weatherData?.daily[0].wind_speed + 'm/s',
+			label: 'Wind',
+			icon: Wind,
+		}
+	]
 
 	return (
 		<div className='App'>
@@ -51,7 +53,10 @@ export default function App() {
 				<div className='overview-container'>
 					<h1>Overview</h1>
 					<div className='datapoints-container'>
-						{DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)}
+						{loading ? ('Loading...') :
+							error ? 'Something went wrong.' :
+								DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)
+						}
 					</div>
 				</div>
 				<div className='detail-container'>
@@ -75,8 +80,8 @@ function getWeatherData(lat: string, lon: string, apikey: string) {
 	return useFetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`)
 }
 
-function getMockData(shouldErr = false) {
-	const [data, setData] = useState<unknown>()
+function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Error | null] {
+	const [data, setData] = useState<WeatherData>()
 	const [error, setError] = useState<Error | null>(null)
 	const [loading, setLoading] = useState<boolean>(true)
 
