@@ -69,17 +69,17 @@ export default function App() {
 				<div className='app-container'>
 					<div className='overview-container'>
 						<h1>Overview</h1>
-						<div className='datapoints-container'>
-							{loading ? ('Loading...') :
-								error ? 'Something went wrong.' : null}
+						{loading ? ('Loading...') :
+							error ? 'Something went wrong.' : null}
 
-							<TransitionLifecycle
-								willRender={!loading}
-								transition={DEFAULT_TRANSITION}
-							>
+						<TransitionLifecycle
+							willRender={!loading}
+							transition={DEFAULT_TRANSITION}
+						>
+							<div className='datapoints-container'>
 								{DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)}
-							</TransitionLifecycle>
-						</div>
+							</div>
+						</TransitionLifecycle>
 					</div>
 					<div className='detail-container'>
 						<h1>Detail</h1>
