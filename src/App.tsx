@@ -4,6 +4,31 @@ import './styles/Type.css'
 import DataPoint from './components/DataPoint'
 
 import Thermostat from './icons/thermostat.svg'
+import Humidity from './icons/humidity.svg'
+import Waterdrop from './icons/waterdrop.svg'
+import Wind from './icons/wind.svg'
+
+const DataPointProps = [
+	{
+		data: '20',
+		label: 'Temperature',
+		icon: Thermostat,
+	},
+	{
+		data: '0',
+		label: 'Humidity',
+		icon: Humidity,
+	}, {
+		data: '0',
+		label: 'Preciptation',
+		icon: Waterdrop,
+	},
+	{
+		data: '0',
+		label: 'Wind',
+		icon: Wind,
+	}
+]
 
 export default function App() {
 	return (
@@ -12,10 +37,7 @@ export default function App() {
 				<div className='overview-container'>
 					<h1>Overview</h1>
 					<div className='datapoints-container'>
-						<DataPoint label='Temperature' data='24' icon={Thermostat} onClick={() => console.log('hello')} />
-						<DataPoint label='Temperature' data='24' icon={Thermostat} onClick={() => console.log('hello')} />
-						<DataPoint label='Temperature' data='24' icon={Thermostat} onClick={() => console.log('hello')} />
-						<DataPoint label='Temperature' data='24' icon={Thermostat} onClick={() => console.log('hello')} />
+						{DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)}
 					</div>
 				</div>
 				<div className='detail-container'>
