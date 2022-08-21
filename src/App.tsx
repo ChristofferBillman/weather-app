@@ -4,6 +4,7 @@ import './styles/Type.css'
 import { useState, useEffect } from 'react'
 
 import DataPoint from './components/DataPoint'
+import TransitionLifecycle, { Transition } from './components/TransitionLifecycle'
 import WeatherData from './WeatherData'
 
 import useFetch from './hooks/useFetch'
@@ -21,9 +22,21 @@ const APIKEY = '1a87f44fa0405437594d18b5815bcaa8'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UMEA = '63.826867812391846, 20.263559761339305'
 
+const DEFAULT_TRANSITION: Transition = {
+	initial: { opacity: 0, transform: 'translateY(20px)' },
+	transition: { opacity: 1, transform: 'translateY(0px)' },
+	exit: { opacity: 0 },
+	duration: 500,
+}
+
 export default function App() {
 
 	const [weatherData, loading, error] = getMockData()
+	const [renderPage, setRenderPage] = useState(false)
+
+	useEffect(() => {
+		setRenderPage(true)
+	}, [])
 
 	const DataPointProps = [
 		{
@@ -49,26 +62,40 @@ export default function App() {
 
 	return (
 		<div className='App'>
-			<div className='app-container'>
-				<div className='overview-container'>
-					<h1>Overview</h1>
-					<div className='datapoints-container'>
-						{loading ? ('Loading...') :
-							error ? 'Something went wrong.' :
-								DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)
-						}
+			<TransitionLifecycle
+				willRender={renderPage}
+				transition={DEFAULT_TRANSITION}
+			>
+				<div className='app-container'>
+					<div className='overview-container'>
+						<h1>Overview</h1>
+						<div className='datapoints-container'>
+							{loading ? ('Loading...') :
+								error ? 'Something went wrong.' : null}
+
+							<TransitionLifecycle
+								willRender={!loading}
+								transition={DEFAULT_TRANSITION}
+							>
+								{DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)}
+							</TransitionLifecycle>
+						</div>
+					</div>
+					<div className='detail-container'>
+						<h1>Detail</h1>
+						<code>
+							{loading ? ('Loading...') :
+								error ? 'Something went wrong.' : null}
+							<TransitionLifecycle
+								willRender={!loading}
+								transition={DEFAULT_TRANSITION}
+							>
+								{JSON.stringify(weatherData, null, 4)}
+							</TransitionLifecycle>
+						</code>
 					</div>
 				</div>
-				<div className='detail-container'>
-					<h1>Detail</h1>
-					<code>
-						{loading ? ('Loading...') :
-							error ? 'Something went wrong.' :
-								JSON.stringify(weatherData, null, 4)
-						}
-					</code>
-				</div>
-			</div>
+			</TransitionLifecycle>
 		</div>
 	)
 }
