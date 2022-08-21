@@ -1,5 +1,5 @@
 interface DataPointProps {
-	data: string
+	data: string | number | undefined;
 	label?: string
 	icon?: string
 	color?: string
@@ -13,7 +13,7 @@ export default function DataPoint({ data, label, icon, color, onClick }: DataPoi
 				<h3 style={{ color: color }}>{label}</h3>
 				<img src={icon} className='icon-sm' />
 			</div>
-			<h1 style={{ color: color }}>{data}</h1>
+			<h1 style={{ color: color }}>{data === undefined ? 'N/A' : data}</h1>
 		</div>
 	)
 }
