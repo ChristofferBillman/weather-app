@@ -8,9 +8,9 @@ import { useState, useEffect } from 'react'
  * - loading - boolean indicating if the fetch is in progress
  * - error - the error returned from the fetch
  */
-export default function useFetch(url: string): [unknown, boolean, unknown] {
+export default function useFetch(url: string): [unknown, boolean, Error | undefined] {
 	const [data, setData] = useState<unknown>()
-	const [error, setError] = useState<Error | null>(null)
+	const [error, setError] = useState<Error | undefined>(undefined)
 	const [loading, setLoading] = useState<boolean>(true)
 
 	useEffect(() => {
