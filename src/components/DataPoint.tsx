@@ -1,4 +1,4 @@
-interface DataPointProps {
+export interface DataPointProps {
 	data: string | number | undefined;
 	label?: string
 	icon?: string
