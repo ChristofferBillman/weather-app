@@ -10,11 +10,11 @@ import WeatherData from './types/WeatherData'
 import useFetch from './hooks/useFetch'
 
 import * as MockDataUntyped from './MockData.json'
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+import * as APIKEY from './ApiKey.json'
 import TemperatureDetail from './components/TemperatureDetail'
 const MockData: WeatherData | undefined = MockDataUntyped
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const APIKEY = '1a87f44fa0405437594d18b5815bcaa8'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UMEA = '63.826867812391846,20.263559761339305'
 
