@@ -23,12 +23,13 @@ interface Info {
 	moon_phase?: number
 	pop?: number
 	temp?: number | DailyTemp
-	rain?: number
+	rain?: number | unknown
 	uvi?: number
 	visibility?: number
 	weather?: WeatherSummary[]
 	wind_deg?: number
 	wind_speed?: number
+	wind_gust?: number
 }
 interface WeatherSummary {
 	description: string
