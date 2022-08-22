@@ -12,17 +12,19 @@ html {
 	grid-template-columns: 1fr 1fr;
 	grid-template-areas:
 		"left right";
-	grid-gap: 8rem;
 	justify-items: start;
-	margin: 8rem;
+	min-height: 100vh;
 }
 
 .overview-container {
 	grid-area: left;
+	padding: 8rem;
 }
 
 .detail-container {
 	grid-area: right;
+	padding: 8rem;
+	width: 50vw;
 }
 
 .datapoints-container {
