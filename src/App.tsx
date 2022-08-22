@@ -3,24 +3,20 @@ import './styles/Type.css'
 
 import { useState, useEffect } from 'react'
 
-import DataPoint from './components/DataPoint'
+import Overview from './components/Overview'
 import TransitionLifecycle, { Transition } from './components/TransitionLifecycle'
-import WeatherData from './WeatherData'
+import WeatherData from './types/WeatherData'
 
 import useFetch from './hooks/useFetch'
 
-import Thermostat from './icons/thermostat.svg'
-import Humidity from './icons/humidity.svg'
-import Waterdrop from './icons/waterdrop.svg'
-import Wind from './icons/wind.svg'
-
 import * as MockDataUntyped from './MockData.json'
+import TemperatureDetail from './components/TemperatureDetail'
 const MockData: WeatherData | undefined = MockDataUntyped
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const APIKEY = '1a87f44fa0405437594d18b5815bcaa8'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const UMEA = '63.826867812391846, 20.263559761339305'
+const UMEA = '63.826867812391846,20.263559761339305'
 
 const DEFAULT_TRANSITION: Transition = {
 	initial: { opacity: 0, transform: 'translateY(20px)' },
@@ -32,33 +28,13 @@ const DEFAULT_TRANSITION: Transition = {
 export default function App() {
 
 	const [weatherData, loading, error] = getMockData()
-	const [renderPage, setRenderPage] = useState(false)
+	//getWeatherData(UMEA, APIKEY) as [WeatherData | undefined, boolean, Error | undefined]
+	const [renderPage, setRenderPage] = useState<boolean>(false)
+	const [selectedDataPoint, setSelectedDataPoint] = useState<string | undefined>(undefined)
 
 	useEffect(() => {
 		setRenderPage(true)
 	}, [])
-
-	const DataPointProps = [
-		{
-			data: weatherData?.current.temp as number + '°C',
-			label: 'Temperature',
-			icon: Thermostat,
-		},
-		{
-			data: weatherData?.current.humidity + '%',
-			label: 'Humidity',
-			icon: Humidity,
-		}, {
-			data: weatherData?.daily[0].rain + 'mm',
-			label: 'Preciptation',
-			icon: Waterdrop,
-		},
-		{
-			data: weatherData?.daily[0].wind_speed + 'm/s',
-			label: 'Wind',
-			icon: Wind,
-		}
-	]
 
 	return (
 		<div className='App'>
@@ -67,33 +43,20 @@ export default function App() {
 				transition={DEFAULT_TRANSITION}
 			>
 				<div className='app-container'>
-					<div className='overview-container'>
-						<h1>Overview</h1>
-						{loading ? ('Loading...') :
-							error ? 'Something went wrong.' : null}
-
-						<TransitionLifecycle
-							willRender={!loading}
-							transition={DEFAULT_TRANSITION}
-						>
-							<div className='datapoints-container'>
-								{DataPointProps.map((props, index) => <DataPoint key={index} {...props} />)}
-							</div>
-						</TransitionLifecycle>
-					</div>
-					<div className='detail-container'>
-						<h1>Detail</h1>
-						<code>
-							{loading ? ('Loading...') :
-								error ? 'Something went wrong.' : null}
-							<TransitionLifecycle
-								willRender={!loading}
-								transition={DEFAULT_TRANSITION}
-							>
-								{JSON.stringify(weatherData, null, 4)}
-							</TransitionLifecycle>
-						</code>
-					</div>
+					<Overview
+						data={weatherData}
+						loading={loading}
+						error={error}
+						transition={DEFAULT_TRANSITION}
+						selectedDataPoint={selectedDataPoint}
+						setSelectedDataPoint={setSelectedDataPoint}
+					/>
+					<TemperatureDetail
+						data={weatherData}
+						loading={loading}
+						error={error}
+						transition={DEFAULT_TRANSITION}
+					/>
 				</div>
 			</TransitionLifecycle>
 		</div>
@@ -102,14 +65,15 @@ export default function App() {
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getWeatherData(lat: string, lon: string, apikey: string) {
+function getWeatherData(location: string, apikey: string): [unknown | undefined, boolean, Error | undefined] {
+	const [lat, lon] = location.split(',')
 	// eslint-disable-next-line quotes
 	return useFetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`)
 }
 
-function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Error | null] {
+function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Error | undefined] {
 	const [data, setData] = useState<WeatherData>()
-	const [error, setError] = useState<Error | null>(null)
+	const [error, setError] = useState<Error | undefined>(undefined)
 	const [loading, setLoading] = useState<boolean>(true)
 
 	useEffect(() => {
@@ -117,7 +81,7 @@ function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Erro
 
 		setTimeout(() => {
 			if (shouldErr) {
-				setError(new Error('Something went wrong'))
+				setError(new Error('Unable to fetch data.'))
 				return
 			}
 			setData(MockData)
