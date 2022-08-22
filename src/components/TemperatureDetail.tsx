@@ -47,6 +47,7 @@ export default function TemperatureDetail({ data, loading, error, transition }: 
 					:
 					<DataPoint
 						data={data?.current.temp as number + '°C'}
+						dataColor={new hsl(HUE, 100, 40).toString()}
 						label='Now'
 					/>
 				}
