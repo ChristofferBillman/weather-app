@@ -1,18 +1,18 @@
-import Thermostat from '../icons/thermostat.svg'
+import Waterdrop from '../icons/waterdrop.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
 import { fetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData from '../types/WeatherData'
 
-interface TemperatureDetailProps {
+interface RainDetailProps {
 	weatherRequest: fetchRequest
 	transition: Transition
 }
 
-const HUE = 47
+const HUE = 223
 
-export default function TemperatureDetail({ weatherRequest, transition }: TemperatureDetailProps): JSX.Element {
+export default function TemperatureDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
 	const {data,error} = weatherRequest
 	const typedData: WeatherData = data as WeatherData
 	return (
@@ -23,8 +23,8 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 		>
 			<>
 				<div className='row align-center'>
-					<h1>Temperature</h1>
-					<img src={Thermostat} className='icon-lg' />
+					<h1>Percipication</h1>
+					<img src={Waterdrop} className='icon-lg' />
 				</div>
 				{error ?
 					error.message

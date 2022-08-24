@@ -7,12 +7,16 @@ import Overview from './components/Overview'
 import TransitionLifecycle, { Transition } from './components/TransitionLifecycle'
 import WeatherData from './types/WeatherData'
 
-import useFetch from './hooks/useFetch'
+import useFetch, {fetchRequest} from './hooks/useFetch'
 
 import * as MockDataUntyped from './MockData.json'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 import * as APIKEY from './ApiKey.json'
 import TemperatureDetail from './components/TemperatureDetail'
+import RainDetail from './components/RainDetail'
+import DebugDetail from './components/DebugDetail'
+import { DetailSections } from './components/DataPoint'
+
 const MockData: WeatherData | undefined = MockDataUntyped
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -27,14 +31,35 @@ const DEFAULT_TRANSITION: Transition = {
 
 export default function App() {
 
-	const [weatherData, loading, error] = getMockData()
+	const weatherRequest: fetchRequest = getMockData()
 	//getWeatherData(UMEA, APIKEY) as [WeatherData | undefined, boolean, Error | undefined]
 	const [renderPage, setRenderPage] = useState<boolean>(false)
-	const [selectedDataPoint, setSelectedDataPoint] = useState<string | undefined>(undefined)
+	const [selectedDataPoint, setSelectedDataPoint] = useState<DetailSections>(DetailSections.DEBUG)
 
 	useEffect(() => {
 		setRenderPage(true)
 	}, [])
+
+	const getDetailSection = (): JSX.Element => {
+		switch (selectedDataPoint) {
+		case DetailSections.TEMP:
+			return <TemperatureDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
+		case DetailSections.RAIN:
+			return <RainDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
+		default:
+			return <DebugDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
+		}
+	}
+
 
 	return (
 		<div className='App'>
@@ -44,19 +69,12 @@ export default function App() {
 			>
 				<div className='app-container'>
 					<Overview
-						data={weatherData}
-						loading={loading}
-						error={error}
+						weatherRequest={weatherRequest}
 						transition={DEFAULT_TRANSITION}
 						selectedDataPoint={selectedDataPoint}
 						setSelectedDataPoint={setSelectedDataPoint}
 					/>
-					<TemperatureDetail
-						data={weatherData}
-						loading={loading}
-						error={error}
-						transition={DEFAULT_TRANSITION}
-					/>
+					{getDetailSection()}
 				</div>
 			</TransitionLifecycle>
 		</div>
@@ -65,13 +83,13 @@ export default function App() {
 
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getWeatherData(location: string, apikey: string): [unknown | undefined, boolean, Error | undefined] {
+function getWeatherData(location: string, apikey: string): fetchRequest {
 	const [lat, lon] = location.split(',')
 	// eslint-disable-next-line quotes
 	return useFetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`)
 }
 
-function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Error | undefined] {
+function getMockData(shouldErr = false): fetchRequest {
 	const [data, setData] = useState<WeatherData>()
 	const [error, setError] = useState<Error | undefined>(undefined)
 	const [loading, setLoading] = useState<boolean>(true)
@@ -95,5 +113,5 @@ function getMockData(shouldErr = false): [WeatherData | undefined, boolean, Erro
 			setLoading(false)
 	}, [data, error])
 
-	return [data, loading, error]
+	return {data, loading, error}
 }

@@ -1,34 +1,23 @@
-import TransitionLifecycle, { Transition } from './TransitionLifecycle'
-import WeatherData from '../types/WeatherData'
+import { Transition } from './TransitionLifecycle'
+import Detail from './Detail'
+import { fetchRequest } from '../hooks/useFetch'
 
-interface DetailProps {
-	data: WeatherData | undefined
-	loading: boolean
-	error: Error | undefined
-	label: string
-	icon?: string
-	color?: string
+interface DebugDetailProps {
+	weatherRequest: fetchRequest
 	transition: Transition
 }
 
-export default function DebugDetail({ data, loading, error, label, icon, color, transition }: DetailProps): JSX.Element {
-	return (
-		<div className='detail-container'>
-			<div className='row align-center'>
-				<h1>{label}</h1>
-				<img src={icon} className='icon-sm' />
-			</div>
-			<code>
-				{loading && ('Loading...')}
+const HUE=256
 
-				<TransitionLifecycle
-					willRender={!loading}
-					transition={transition}
-					verbose={true}
-				>
-					{error ? error.message : JSON.stringify(data, null, 4)}
-				</TransitionLifecycle>
-			</code>
-		</div>
+export default function DebugDetail({ weatherRequest, transition }: DebugDetailProps): JSX.Element {
+	const {data, error} = weatherRequest
+	return (
+		<Detail
+			weatherRequest={weatherRequest}
+			transition={transition}
+			hue={HUE}
+		>
+			{error ? <p>error.message</p> : <code>{JSON.stringify(data, null, 4)}</code>}
+		</Detail>
 	)
 }
