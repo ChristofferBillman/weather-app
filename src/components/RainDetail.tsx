@@ -30,7 +30,7 @@ export default function TemperatureDetail({ weatherRequest, transition }: RainDe
 					error.message
 					:
 					<DataPoint
-						data={typedData?.current.temp as number + '°C'}
+						data={typedData?.current.temp + '°C'}
 						dataColor={new hsl(HUE, 100, 40).toString()}
 						label='Now'
 					/>
