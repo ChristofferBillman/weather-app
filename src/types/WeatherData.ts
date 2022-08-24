@@ -9,7 +9,7 @@ export default interface WeatherData {
 	timezone: string
 	timezone_offset: number
 }
-interface Info {
+export interface Info {
 	clouds?: number
 	dew_point?: number
 	dt?: number
@@ -37,7 +37,7 @@ interface WeatherSummary {
 	id: number
 	main: string
 }
-interface DailyTemp {
+export interface DailyTemp {
 	day?: number
 	min?: number
 	max?: number
