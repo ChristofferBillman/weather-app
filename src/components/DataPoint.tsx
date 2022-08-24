@@ -5,6 +5,7 @@ export interface DataPointProps {
 	hasSection?: DetailSections
 	dataColor?: string
 	labelColor?: string
+	size?: 'sm' | 'lg' | undefined
 	onClick?: () => void
 }
 export enum DetailSections {
@@ -13,9 +14,9 @@ export enum DetailSections {
 	DEBUG,
 }
 
-export default function DataPoint({ data, label, icon, dataColor, labelColor, onClick }: DataPointProps): JSX.Element {
+export default function DataPoint({ data, label, icon, dataColor, labelColor, size, onClick }: DataPointProps): JSX.Element {
 	return (
-		<div className='datapoint-container' onClick={onClick}>
+		<div className={getContainerClass(size)} onClick={onClick}>
 			<div className='row align-center'>
 				<h3 style={{ color: labelColor }}>{label}</h3>
 				<img src={icon} className='icon-sm' />
@@ -23,4 +24,15 @@ export default function DataPoint({ data, label, icon, dataColor, labelColor, on
 			<h1 style={{ color: dataColor }}>{data === undefined ? 'N/A' : data}</h1>
 		</div>
 	)
+}
+
+function getContainerClass(size: string | undefined) {
+	switch(size){
+	case 'lg':
+		return 'datapoint-container'
+	case 'sm':
+		return 'datapoint-container datapoint-sm'
+	default:
+		return 'datapoint-container'
+	}
 }
