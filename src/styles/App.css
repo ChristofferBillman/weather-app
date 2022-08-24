@@ -68,6 +68,18 @@ html {
 	opacity: 0.5;
 }
 
+/* GRAPH */
+.graph-container {
+	height: 256px;
+	width: 100%;
+}
+
+.line {
+	position: absolute;
+	background-color: var(--grey);
+	border-radius: 2px;
+}
+
 /* Mobile media queries */
 @media (max-width: 768px) {
 	.app-container {
