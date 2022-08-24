@@ -2,9 +2,15 @@ export interface DataPointProps {
 	data: string | number | undefined;
 	label?: string
 	icon?: string
+	hasSection?: DetailSections
 	dataColor?: string
 	labelColor?: string
 	onClick?: () => void
+}
+export enum DetailSections {
+	TEMP,
+	RAIN,
+	DEBUG,
 }
 
 export default function DataPoint({ data, label, icon, dataColor, labelColor, onClick }: DataPointProps): JSX.Element {

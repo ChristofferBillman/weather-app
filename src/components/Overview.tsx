@@ -1,42 +1,48 @@
 import TransitionLifecycle, { Transition } from './TransitionLifecycle'
-import DataPoint, { DataPointProps } from './DataPoint'
+import DataPoint, { DataPointProps, DetailSections } from './DataPoint'
 import WeatherData from '../types/WeatherData'
 
 import Thermostat from '../icons/thermostat.svg'
 import Humidity from '../icons/humidity.svg'
 import Waterdrop from '../icons/waterdrop.svg'
 import Wind from '../icons/wind.svg'
+import { fetchRequest } from '../hooks/useFetch'
 
 interface OverviewProps {
-	data: WeatherData | undefined
-	loading: boolean
-	error: Error | undefined
+	weatherRequest: fetchRequest
 	transition: Transition
-	selectedDataPoint: string | undefined
-	setSelectedDataPoint: (dataPoint: string | undefined) => void
+	selectedDataPoint: DetailSections
+	setSelectedDataPoint: (dataPoint: DetailSections) => void
 }
 
-export default function Overview({ data, loading, error, transition }: OverviewProps): JSX.Element {
+export default function Overview({ weatherRequest, transition, setSelectedDataPoint}: OverviewProps): JSX.Element {
+
+	const {data, loading, error} = weatherRequest
+	const typedData: WeatherData = data as WeatherData
 
 	const dataPointProps: DataPointProps[] = [
 		{
-			data: data?.current.temp as number + '°C',
+			data: typedData?.current.temp as number + '°C',
 			label: 'Temperature',
 			icon: Thermostat,
+			hasSection: DetailSections.TEMP
 		},
 		{
-			data: data?.current.humidity + '%',
+			data: typedData?.current.humidity + '%',
 			label: 'Humidity',
 			icon: Humidity,
+			hasSection: DetailSections.DEBUG
 		}, {
-			data: data?.daily[0].rain === undefined ? '0mm' : data?.daily[0].rain + 'mm',
+			data: typedData?.daily[0].rain === undefined ? '0mm' : typedData?.daily[0].rain + 'mm',
 			label: 'Preciptation',
 			icon: Waterdrop,
+			hasSection: DetailSections.RAIN
 		},
 		{
-			data: data?.daily[0].wind_speed + 'm/s',
+			data: typedData?.daily[0].wind_speed + 'm/s',
 			label: 'Wind',
 			icon: Wind,
+			hasSection: DetailSections.DEBUG
 		}
 	]
 
@@ -53,7 +59,8 @@ export default function Overview({ data, loading, error, transition }: OverviewP
 					{error ?
 						error.message
 						:
-						dataPointProps.map((props, index) => <DataPoint key={index} {...props} />)
+						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+						dataPointProps.map((p, index) => <DataPoint key={index} onClick={() => {setSelectedDataPoint(p.hasSection!)}} {...p} />)
 					}
 				</div>
 			</TransitionLifecycle>
