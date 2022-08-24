@@ -42,6 +42,11 @@ html {
 	user-select: none;
 }
 
+.datapoint-sm {
+	transform: scale(0.75);
+	width: fit-content
+}
+
 .row {
 	display: flex;
 	flex-direction: row;
@@ -54,6 +59,12 @@ html {
 .icon-sm {
 	/* 18 px */
 	height: 1.125rem;
+	opacity: 0.5;
+}
+
+.icon-lg {
+	/* 18 px */
+	height: 2.5rem;
 	opacity: 0.5;
 }
 
