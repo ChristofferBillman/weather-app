@@ -13,11 +13,11 @@ interface RainDetailProps {
 const HUE = 223
 
 export default function TemperatureDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
-	const {data,error} = weatherRequest
+	const {data,error,loading} = weatherRequest
 	const typedData: WeatherData = data as WeatherData
 	return (
 		<Detail
-			weatherRequest={weatherRequest}
+			loading={loading}
 			transition={transition}
 			hue={HUE}
 		>

@@ -2,7 +2,7 @@ import TransitionLifecycle, { Transition } from './TransitionLifecycle'
 import { fetchRequest } from '../hooks/useFetch'
 
 interface DetailProps {
-	weatherRequest: fetchRequest
+	loading: boolean
 	transition: Transition
 	children: JSX.Element | JSX.Element[]
 	hue?: number
@@ -23,8 +23,7 @@ export class hsl {
 	}
 }
 
-export default function TemperatureDetail({ weatherRequest, transition, children, hue }: DetailProps): JSX.Element {
-	const {loading} = weatherRequest
+export default function TemperatureDetail({ loading, transition, children, hue }: DetailProps): JSX.Element {
 	return (
 		<div className='detail-container' style={{ backgroundColor: hue ? new hsl(hue, 100, 96).toString(): 'white' }}>
 			{loading && ('Loading...')}

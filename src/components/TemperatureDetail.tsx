@@ -11,7 +11,7 @@ interface TemperatureDetailProps {
 }
 
 export default function TemperatureDetail({ weatherRequest, transition }: TemperatureDetailProps): JSX.Element {
-	const {data,error} = weatherRequest
+	const {data,error, loading} = weatherRequest
 	const typedData: WeatherData = data as WeatherData
 
 	// Remove all decimals after first one and cast to int.
@@ -22,7 +22,7 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 	
 	return (
 		<Detail
-			weatherRequest={weatherRequest}
+			loading={loading}
 			transition={transition}
 			hue={tempToHue(current)}
 		>
