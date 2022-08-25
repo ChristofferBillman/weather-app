@@ -3,6 +3,8 @@ import { useEffect, useState } from 'react'
 interface GraphProps {
 	dataPoints: Point[]
 	axisOptions?: AxisOptions
+	color1: string
+	color2: string
 }
 interface AxisOptions {
 	boundX?: [number,number]
@@ -17,7 +19,7 @@ interface Point{
 const HEIGHT = 256
 const WIDTH = 256 * 2
 
-export default function Graph({dataPoints, axisOptions}: GraphProps) {
+export default function Graph({dataPoints, axisOptions, color1, color2}: GraphProps) {
 
 	const [boundX, setBoundX] = useState<[number,number]>()
 	const [boundY, setBoundY] = useState<[number,number]>()
@@ -33,9 +35,15 @@ export default function Graph({dataPoints, axisOptions}: GraphProps) {
 
 	const drawGraph = () =>{
 		return (
-			<svg height={HEIGHT + 10} width={WIDTH + 10}>
+			<svg height={HEIGHT + 10} width={WIDTH + 10} style={{zIndex: 1}}>
+				<defs>
+					<linearGradient id='gradient' x1="0.5" y1="1" x2="0.5" y2="0">
+						<stop offset="0%" stopColor={color1}/>
+						<stop offset="100%" stopColor={color2}/>
+					</linearGradient>
+				</defs>
 				<path
-					stroke='black'
+					stroke='url(#gradient)'
 					fill='none'
 					strokeWidth='7'
 					d={getPath()}
@@ -48,12 +56,15 @@ export default function Graph({dataPoints, axisOptions}: GraphProps) {
 		let pathString = ''
 		for(let i = 0; i < dataPoints.length; i++){
 			const pixelPos = coordToPx(dataPoints[i])
+			const cOne = coordToPx({x: dataPoints[i].x - 0.2, y: dataPoints[i].y})
+			const cTwo = coordToPx({x: dataPoints[i].x - 0.2, y: dataPoints[i].y})
 			if(i === 0) {
-				pathString += `M0 ${HEIGHT} L${pixelPos.x} ${pixelPos.y} `
+				pathString += `M0 ${HEIGHT} C${cOne.x} ${cOne.y} ${cTwo.x} ${cTwo.y} ${pixelPos.x} ${pixelPos.y} `
 				continue
 			}
 			const lastPixelPos = coordToPx(dataPoints[i-1])
-			pathString+= `M${lastPixelPos.x} ${lastPixelPos.y} L${pixelPos.x} ${pixelPos.y} `
+
+			pathString+= `M${lastPixelPos.x} ${lastPixelPos.y} C${cOne.x} ${cOne.y} ${cTwo.x} ${cTwo.y} ${pixelPos.x} ${pixelPos.y} `
 		}
 		return pathString
 	}
