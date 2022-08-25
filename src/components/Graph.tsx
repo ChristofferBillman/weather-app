@@ -31,6 +31,12 @@ export default function Graph({dataPoints, axisOptions}: GraphProps) {
 		setter([min,max])
 	}
 
+	const drawGraph = () =>{
+		return <svg>
+			<path d="M 10 10 C 20 20, 40 20, 50 10" stroke="black" strokeWidth="7" fill="transparent"></path>
+		</svg>
+	}
+
 	useEffect(() => {
 		if(axisOptions.boundX === undefined) handleNoBounds(setBoundX, 'x')
 		else setBoundX(axisOptions.boundX)
@@ -38,14 +44,23 @@ export default function Graph({dataPoints, axisOptions}: GraphProps) {
 		else setBoundY(axisOptions.boundY)
 	},[])
 
+	const renderGrid = (): JSX.Element => {
+		return (
+			<>
+				{[...Array(numCols)].map((e, i) => {
+					if(i !== 0) return <Line key={i} direction='horizontal' offset={WIDTH/numCols * i}/>
+				})}
+				{[...Array(numRows)].map((e, i) => {
+					if(i !== 0) return <Line key={i} direction='vertical' offset={HEIGHT/numRows * i}/>
+				})}
+			</>
+		)
+	}
+
 	return (
 		<div className='graph-container' style={{width: WIDTH + 'px', height: HEIGHT + 'px'}}>
-			{[...Array(numCols)].map((e, i) => {
-				if(i !== 0) return <Line key={i} direction='horizontal' offset={WIDTH/numCols * i}/>
-			})}
-			{[...Array(numRows)].map((e, i) => {
-				if(i !== 0) return <Line key={i} direction='vertical' offset={HEIGHT/numRows * i}/>
-			})}
+			{renderGrid()}
+			{drawGraph()}
 		</div>
 	)
 }
