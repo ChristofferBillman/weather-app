@@ -8,7 +8,7 @@ interface DebugDetailProps {
 	transition: Transition
 }
 
-const mockData = [{x: 1, y:1},{x: 2, y:2},{x: 3, y:3}]
+const mockData = [{x: 0, y:0},{x: 1, y:1},{x: 2, y:0},{x: 3, y: 0}]
 
 const HUE=256
 
@@ -22,10 +22,6 @@ export default function DebugDetail({ weatherRequest, transition }: DebugDetailP
 		>
 			<Graph
 				dataPoints={mockData}
-				axisOptions={{
-					boundX: [0,3],
-					boundY: [0,3]
-				}}
 			/>
 			{/*error ? <p>error.message</p> : <code>{JSON.stringify(data, null, 4)}</code>*/}
 		</Detail>

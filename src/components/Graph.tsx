@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 
 interface GraphProps {
 	dataPoints: Point[]
-	axisOptions: AxisOptions
+	axisOptions?: AxisOptions
 }
 interface AxisOptions {
 	boundX?: [number,number]
@@ -32,12 +32,42 @@ export default function Graph({dataPoints, axisOptions}: GraphProps) {
 	}
 
 	const drawGraph = () =>{
-		return <svg>
-			<path d="M 10 10 C 20 20, 40 20, 50 10" stroke="black" strokeWidth="7" fill="transparent"></path>
-		</svg>
+		return (
+			<svg height={HEIGHT + 10} width={WIDTH + 10}>
+				<path
+					stroke='black'
+					fill='none'
+					strokeWidth='7'
+					d={getPath()}
+				/>
+			</svg>
+		)
+	}
+	const getPath = () =>{
+		if(boundX === undefined || boundY === undefined) return
+		let pathString = ''
+		for(let i = 0; i < dataPoints.length; i++){
+			const pixelPos = coordToPx(dataPoints[i])
+			if(i === 0) {
+				pathString += `M0 ${HEIGHT} L${pixelPos.x} ${pixelPos.y} `
+				continue
+			}
+			const lastPixelPos = coordToPx(dataPoints[i-1])
+			pathString+= `M${lastPixelPos.x} ${lastPixelPos.y} L${pixelPos.x} ${pixelPos.y} `
+		}
+		return pathString
+	}
+	const coordToPx = (p: Point): Point => {
+		if(boundX === undefined || boundY === undefined) throw new Error('coordToPx was called before boundX or boundY was defined.')
+		return {x: p.x * WIDTH / boundX[1], y: HEIGHT - (p.y * HEIGHT / boundY[1])}
 	}
 
 	useEffect(() => {
+		if(axisOptions === undefined){
+			handleNoBounds(setBoundX, 'x')
+			handleNoBounds(setBoundY, 'y')
+			return
+		}
 		if(axisOptions.boundX === undefined) handleNoBounds(setBoundX, 'x')
 		else setBoundX(axisOptions.boundX)
 		if(axisOptions.boundY === undefined) handleNoBounds(setBoundY, 'y')
