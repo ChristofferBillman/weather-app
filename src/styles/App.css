@@ -74,10 +74,9 @@ html {
 	width: 100%;
 }
 
-.line {
-	position: absolute;
-	background-color: rgba(0, 0, 0, 0.15);
-	border-radius: 2px;
+.graph-label {
+	color: var(--grey);
+	font-size: 1rem;
 }
 
 /* Mobile media queries */
