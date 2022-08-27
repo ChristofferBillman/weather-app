@@ -12,7 +12,7 @@ export default interface WeatherData {
 export interface Info {
 	clouds?: number
 	dew_point?: number
-	dt?: number
+	dt: number
 	feels_like?: number | DailyTemp
 	humidity?: number
 	pressure?: number
