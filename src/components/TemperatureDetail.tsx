@@ -1,9 +1,11 @@
 import Thermostat from '../icons/thermostat.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
+import Graph, {Point} from './Graph'
 import { fetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData, {DailyTemp} from '../types/WeatherData'
+import { useEffect, useState } from 'react'
 
 interface TemperatureDetailProps {
 	weatherRequest: fetchRequest
@@ -19,6 +21,37 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 	const avg = Number((((typedData?.daily[0].temp as DailyTemp).day) as number).toFixed(1))
 	const max = Number((((typedData?.daily[0].temp as DailyTemp).max) as number).toFixed(1))
 	const current = typedData?.current.temp as number
+
+	const [tempData, setTempData] = useState<Point[]>([])
+	const [labels, setLabels] = useState<{x: string, y: string}[]>([])
+
+	useEffect(() =>{
+		const arr: Point[] = []
+		const labels = []
+		const firstHourInData = new Date((typedData.hourly[0].dt + typedData.timezone_offset)*1000).getHours()
+
+		for(let i = 0; i < typedData.hourly.length/2; i++) {
+			const currentHour = (firstHourInData + i) % 24
+			let xLabel = ''
+
+			if(currentHour <= 9){
+				xLabel = '0' + currentHour
+			}
+			else{
+				xLabel = String(currentHour)
+			}
+			labels[i] = {
+				x: xLabel,
+				y: String(Math.ceil(typedData.hourly[i].temp as number))
+			}
+			arr[i] = {
+				x: i,
+				y: typedData.hourly[i].temp as number
+			}
+		}
+		setTempData(arr)
+		setLabels(labels)
+	},[])
 	
 	return (
 		<Detail
@@ -35,6 +68,12 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 					error.message
 					:
 					<>
+						<Graph
+							dataPoints={tempData}
+							axisOptions={{labels: labels}}
+							color2={new hsl(tempToHue(max),100,50).toString()}
+							color1={new hsl(tempToHue(min),100,50).toString()}
+						/>
 						<DataPoint
 							data={current + '°C'}
 							dataColor={new hsl(tempToHue(current), 100, 40).toString()}
