@@ -36,7 +36,6 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 
 	const drawGraph = () =>{
 		const axisLabels = getAxisLabels()
-		if(axisLabels === undefined) return 
 		return (
 			<svg height={HEIGHT +30} width={WIDTH + 20} style={{zIndex: 1}}>
 				<defs>
@@ -52,7 +51,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 					strokeWidth='2'
 					d={getLines()}
 				/>
-				{axisLabels.map((labels: {x: JSX.Element, y: JSX.Element}) => <> {labels.x} {labels.y} </>)}
+				{axisLabels && axisLabels.map((labels: {x: JSX.Element, y: JSX.Element}) => <> {labels.x} {labels.y} </>)}
 				<path
 					stroke='url(#gradient)'
 					fill='none'
@@ -96,7 +95,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 	}
 	const getLines = () => {
 		const vLine = 'v ' + HEIGHT
-		const hLine = 'h ' + WIDTH
+		const hLine = 'h ' + (WIDTH-25)
 		let pathStringX = 'M0 0'
 		let pathStringY = 'M0 0'
 		for(let i = 0; i < dataPoints.length; i++) {
@@ -107,7 +106,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 				y: HEIGHT/dataPoints.length * i
 			}
 			pathStringX += `M${currentPos.x} 0 ${vLine}`
-			pathStringY += `M0 ${currentPos.y} ${hLine}` 
+			pathStringY += `M25 ${currentPos.y - 5} ${hLine}`
 		}
 		return pathStringY +' '+ pathStringX
 	}
@@ -120,7 +119,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 			const cOne = coordToPx({x: dataPoints[i].x, y: dataPoints[i].y})
 			const cTwo = coordToPx({x: dataPoints[i].x, y: dataPoints[i].y})
 			if(i === 0) {
-				pathString += `M${0} ${HEIGHT} C${cOne.x},${cOne.y} ${cTwo.x},${cTwo.y} ${pixelPos.x},${pixelPos.y} `
+				pathString += `M${0} ${HEIGHT}`
 				continue
 			}
 			const lastPixelPos = coordToPx(dataPoints[i-1])
