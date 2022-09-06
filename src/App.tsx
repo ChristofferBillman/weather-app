@@ -29,6 +29,8 @@ const DEFAULT_TRANSITION: Transition = {
 	duration: 500,
 }
 
+// Test commit from vscode web
+
 export default function App() {
 
 	const weatherRequest: fetchRequest = getMockData()
