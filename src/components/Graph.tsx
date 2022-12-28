@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import { hsl } from './Detail'
 
 interface GraphProps {
@@ -52,7 +52,9 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 					strokeWidth='2'
 					d={getLines()}
 				/>
-				{axisLabels.map((labels: {x: JSX.Element, y: JSX.Element}) => <> {labels.x} {labels.y} </>)}
+				{axisLabels.map(((labels: {x: JSX.Element, y: JSX.Element}, index: number) => {
+					return <Fragment key={index}> {labels.x} {labels.y} </Fragment>
+				}))}
 				<path
 					stroke='url(#gradient)'
 					fill='none'
@@ -84,7 +86,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 				</text>,
 				y: <text
 					x={0}
-					y={currentPos.y}
+					y={currentPos.y - 10}
 					fill='gray'
 					className='graph-label'
 				>
@@ -112,22 +114,85 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 		return pathStringY +' '+ pathStringX
 	}
 
-	const getPath = () =>{
+	// This sucked to code...
+	const getPath = () => {
 		if(boundX === undefined || boundY === undefined) return
-		let pathString = ''
-		for(let i = 0; i < dataPoints.length; i++){
-			const pixelPos = coordToPx(dataPoints[i])
-			const cOne = coordToPx({x: dataPoints[i].x, y: dataPoints[i].y})
-			const cTwo = coordToPx({x: dataPoints[i].x, y: dataPoints[i].y})
-			if(i === 0) {
-				pathString += `M${0} ${HEIGHT} C${cOne.x},${cOne.y} ${cTwo.x},${cTwo.y} ${pixelPos.x},${pixelPos.y} `
-				continue
-			}
-			const lastPixelPos = coordToPx(dataPoints[i-1])
 
-			pathString+= `M${lastPixelPos.x},${lastPixelPos.y} C${cOne.x},${cOne.y} ${cTwo.x},${cTwo.y} ${pixelPos.x},${pixelPos.y} `
+		let pathString = `M${0} ${HEIGHT}`
+
+		for(let i = 1; i < dataPoints.length; i++){
+			let beforePrevPos = dataPoints[i-2]
+			let prevPos = dataPoints[i-1]
+			const currentPos = dataPoints[i]
+			let nextPos = dataPoints[i+1]
+			
+			// If these positions don't exist, just set them to the current point.
+			if(beforePrevPos == undefined) beforePrevPos = currentPos
+			if(prevPos == undefined) prevPos = currentPos
+			if(nextPos == undefined) nextPos = currentPos
+
+			// Get the control points for the cubic bezier.
+			const cOne = getControlPoint(beforePrevPos,prevPos,currentPos, true)
+			const cTwo = getControlPoint(prevPos,currentPos,nextPos, false)
+
+			// Map values from temperature-hour coordinate space to pixel coordinate space.
+			const lastPixelPos = coordToPx(prevPos)
+			const pixelPos = coordToPx(currentPos)
+			const cOnePixel = coordToPx(cOne)
+			const cTwoPixel = coordToPx(cTwo)
+
+			// Append current section to path.
+			// Line break in string literal kinda messes up the string but still works so.
+			pathString+= `M${lastPixelPos.x},${lastPixelPos.y} C${cOnePixel.x} ${cOnePixel.y} 
+						  ${cTwoPixel.x} ${cTwoPixel.y}, ${pixelPos.x} ${pixelPos.y} `
 		}
 		return pathString
+
+		/**
+		 * Gets the length between two points using the pythagorean theorem.
+		 * @param p1 First point
+		 * @param p2 Second point
+		 * @returns the length between the points.
+		 */
+		function getLength(p1: Point, p2: Point) {
+			return Math.sqrt(Math.pow(p2.x - p1.x, 2) + Math.pow(p2.y - p1.y, 2))
+		}
+		/**
+		 * Two points define a linear curve.
+		 * Returns the angle at which this curve is from the x-axis.
+		 * @param p1 First point
+		 * @param p2 Second point
+		 * @returns Angle from the x-axis, in radians.
+		 */
+		function getAngle(p1: Point, p2: Point){
+			return Math.atan2(p2.y - p1.y, p2.x - p1.x)
+		}
+		/**
+		 * Gets the point where control point should be placed.
+		 * @param previous Previous point.
+		 * @param current Current point.
+		 * @param next Next point.
+		 * @param forward Which side of the current point the control point should be placed
+		 * 				  on the x-axis.
+		 * @returns The appropriate position for a control point.
+		 */
+		function getControlPoint(previous: Point, current: Point, next: Point, forward: boolean){
+			let length = getLength(previous, next)
+			let angle = getAngle(previous, next)
+
+			// Controls how far from the current point the control point
+			// should be placed on the x-axis.
+			const smoothing = 0.2
+			length = length * smoothing
+
+			// Adding pi reflects the point around the current point since pi rad == 180 deg.
+			angle = angle + (forward ? 0 : Math.PI)
+
+			return {
+				x: current.x + Math.cos(angle) * length,
+				y: current.y + Math.sin(angle) * length
+			}
+		}
 	}
 	const coordToPx = (p: Point): Point => {
 		if(boundX === undefined || boundY === undefined) throw new Error('coordToPx was called before boundX or boundY was defined.')
