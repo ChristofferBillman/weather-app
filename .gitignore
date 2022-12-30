@@ -23,4 +23,4 @@ yarn-debug.log*
 yarn-error.log*
 
 iconcodes.png
-/src/ApiKey.json
+/src/ApiKey.ts
