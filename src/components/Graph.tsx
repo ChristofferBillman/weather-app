@@ -18,8 +18,12 @@ export interface Point{
 	y: number
 }
 
-const HEIGHT = 256
-const WIDTH = 256 * 2
+// TODO: Labels are in wrong order.
+//       Labels are wrong when boundY is set explicitly.
+//       Negative values are not reflected in graph. Min is 0 apperently...
+
+const HEIGHT = 256 + 30
+const WIDTH = HEIGHT * 2
 // dataPoints / LINES is the number of lines shown.
 const LINES = 4
 
@@ -38,7 +42,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 		const axisLabels = getAxisLabels()
 		if(axisLabels === undefined) return 
 		return (
-			<svg height={HEIGHT +30} width={WIDTH + 20} style={{zIndex: 1}}>
+			<svg height={HEIGHT} width={WIDTH} style={{paddingBottom: '24px'}}>
 				<defs>
 					<linearGradient id='gradient' x1="0.5" y1="1" x2="0.5" y2="0">
 						<stop offset="0%" stopColor={color1}/>
@@ -78,7 +82,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 			labels[i] = {
 				x: <text
 					x={currentPos.x - 9}
-					y={HEIGHT + 20}
+					y={HEIGHT}
 					fill='gray'
 					className='graph-label'
 				>
@@ -135,7 +139,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 			const cOne = getControlPoint(beforePrevPos,prevPos,currentPos, true)
 			const cTwo = getControlPoint(prevPos,currentPos,nextPos, false)
 
-			// Map values from temperature-hour coordinate space to pixel coordinate space.
+			// Map values from input data coordinate space to pixel coordinate space.
 			const lastPixelPos = coordToPx(prevPos)
 			const pixelPos = coordToPx(currentPos)
 			const cOnePixel = coordToPx(cOne)
