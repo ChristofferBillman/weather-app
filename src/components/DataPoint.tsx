@@ -12,11 +12,16 @@ export enum DetailSections {
 	TEMP,
 	RAIN,
 	DEBUG,
+	HUMIDITY
 }
 
 export default function DataPoint({ data, label, icon, dataColor, labelColor, size, onClick }: DataPointProps): JSX.Element {
 	return (
-		<div className={getContainerClass(size)} onClick={onClick}>
+		<div
+			className={getContainerClass(size)}
+			style={onClick == undefined ? {cursor: 'auto'} : {cursor: 'pointer'}}
+			onClick={onClick}
+		>
 			<div className='row align-center'>
 				<h3 style={{ color: labelColor }}>{label}</h3>
 				<img src={icon} className='icon-sm' />
