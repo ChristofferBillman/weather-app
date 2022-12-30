@@ -38,7 +38,6 @@ html {
 	min-width: fit-content;
 	padding: 1rem 0rem 1rem 0rem;
 	cursor: pointer;
-	user-select: none;
 }
 
 .datapoint-sm {
@@ -69,7 +68,7 @@ html {
 
 /* GRAPH */
 .graph-container {
-	height: 256px;
+	height: calc(256px + 30px);
 	width: 100%;
 }
 
@@ -78,6 +77,27 @@ html {
 	font-size: 1rem;
 }
 
+.horizontal-radio-selection-container{
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 100px;
+	width: fit-content
+}
+
+.horizontal-radio-selection-item {
+	display: flex;
+	padding: 0 32px 0 32px;
+	border-radius: 100px;
+	transition-duration: 200ms;
+}
+.selected {
+	transition-duration: 200ms;
+	background-color: rgba(150, 255, 253, 0.592);
+}
+.vspace{
+	height: 32px
+}
 /* Mobile media queries */
 @media (max-width: 768px) {
 	.app-container {

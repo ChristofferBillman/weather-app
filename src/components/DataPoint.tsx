@@ -13,6 +13,7 @@ export enum DetailSections {
 	RAIN,
 	WIND,
 	DEBUG,
+	HUMIDITY
 }
 
 export default function DataPoint({ data, label, icon, dataColor, labelColor, size, onClick }: DataPointProps): JSX.Element {
@@ -20,7 +21,11 @@ export default function DataPoint({ data, label, icon, dataColor, labelColor, si
 	if(size === undefined) size = 'lg'
 	
 	return (
-		<div className='datapoint-container' onClick={onClick}>
+		<div
+			className={getContainerClass(size)}
+			style={onClick == undefined ? {cursor: 'auto'} : {cursor: 'pointer'}}
+			onClick={onClick}
+		>
 			<div className='row align-center'>
 				<h3
 					style={{

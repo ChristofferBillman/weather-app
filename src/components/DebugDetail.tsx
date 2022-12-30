@@ -1,10 +1,11 @@
 import { Transition } from './TransitionLifecycle'
 import Detail, { hsl } from './Detail'
 import Graph from './Graph'
-import { fetchRequest } from '../hooks/useFetch'
+import { FetchRequest } from '../hooks/useFetch'
+import WeatherData from '../types/WeatherData'
 
 interface DebugDetailProps {
-	weatherRequest: fetchRequest
+	weatherRequest: FetchRequest<WeatherData>
 	transition: Transition
 }
 

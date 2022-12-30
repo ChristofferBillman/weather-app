@@ -1,11 +1,10 @@
 import { useState, useEffect } from 'react'
 
-export interface fetchRequest{
-	data: unknown,
-	loading: boolean,
+export interface FetchRequest<T>{
+	data: T | undefined
+	loading: boolean
 	error: Error | undefined
 }
-
 /**
  * 
  * @param url - the url to fetch data from
@@ -14,9 +13,9 @@ export interface fetchRequest{
  * - loading - boolean indicating if the fetch is in progress
  * - error - the error returned from the fetch
  */
-export default function useFetch(url: string): fetchRequest {
-	const [data, setData] = useState<unknown>()
-	const [error, setError] = useState<Error | undefined>(undefined)
+export default function useFetch<T>(url: string): FetchRequest<T> {
+	const [data, setData] = useState<T | undefined>()
+	const [error, setError] = useState<Error | undefined>()
 	const [loading, setLoading] = useState<boolean>(true)
 
 	useEffect(() => {
@@ -26,6 +25,7 @@ export default function useFetch(url: string): fetchRequest {
 			.then(text => JSON.parse(text))
 			.then(data => setData(data))
 			.catch(err => setError(err))
+		console.log('fetched data!')
 	}, [url])
 
 	useEffect(() => {
