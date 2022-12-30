@@ -6,10 +6,10 @@ import Thermostat from '../icons/thermostat.svg'
 import Humidity from '../icons/humidity.svg'
 import Waterdrop from '../icons/waterdrop.svg'
 import Wind from '../icons/wind.svg'
-import { fetchRequest } from '../hooks/useFetch'
+import { FetchRequest } from '../hooks/useFetch'
 
 interface OverviewProps {
-	weatherRequest: fetchRequest
+	weatherRequest: FetchRequest<WeatherData>
 	transition: Transition
 	selectedDataPoint: DetailSections
 	setSelectedDataPoint: (dataPoint: DetailSections) => void
@@ -31,7 +31,7 @@ export default function Overview({ weatherRequest, transition, setSelectedDataPo
 			data: typedData?.current.humidity + '%',
 			label: 'Humidity',
 			icon: Humidity,
-			hasSection: DetailSections.DEBUG
+			hasSection: DetailSections.HUMIDITY
 		}, {
 			data: typedData?.daily[0].rain === undefined ? '0mm' : typedData?.daily[0].rain + 'mm',
 			label: 'Preciptation',

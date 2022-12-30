@@ -7,17 +7,19 @@ import Overview from './components/Overview'
 import TransitionLifecycle, { Transition } from './components/TransitionLifecycle'
 import WeatherData from './types/WeatherData'
 
-import useFetch, {fetchRequest} from './hooks/useFetch'
+import useFetch, { FetchRequest } from './hooks/useFetch'
 
-import * as MockDataUntyped from './MockData.json'
+//import * as MockDataUntyped from './MockData.json'
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import * as APIKEY from './ApiKey.json'
+import APIKEY from './ApiKey'
+import mockData from './MockData.json'
 import TemperatureDetail from './components/TemperatureDetail'
 import RainDetail from './components/RainDetail'
 import DebugDetail from './components/DebugDetail'
 import { DetailSections } from './components/DataPoint'
+import HumidityDetail from './components/HumidityDetail'
 
-const MockData: WeatherData | undefined = MockDataUntyped
+//const MockData: WeatherData | undefined = MockDataUntyped
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const UMEA = '63.826867812391846,20.263559761339305'
@@ -29,14 +31,15 @@ const DEFAULT_TRANSITION: Transition = {
 	duration: 500,
 }
 
-// Test commit from vscode web
-
 export default function App() {
-
-	const weatherRequest: fetchRequest = getMockData()
-	//getWeatherData(UMEA, APIKEY) as [WeatherData | undefined, boolean, Error | undefined]
 	const [renderPage, setRenderPage] = useState<boolean>(false)
 	const [selectedDataPoint, setSelectedDataPoint] = useState<DetailSections>(DetailSections.DEBUG)
+
+	const [lat, lon] = UMEA.split(',')
+
+	const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat as string}&lon=${lon as string}&appid=${APIKEY}&units=metric`
+	//console.log(url)
+	const weatherRequest = getMockData() //useFetch<any>(url)
 
 	useEffect(() => {
 		setRenderPage(true)
@@ -51,6 +54,11 @@ export default function App() {
 			/>
 		case DetailSections.RAIN:
 			return <RainDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
+		case DetailSections.HUMIDITY:
+			return <HumidityDetail
 				weatherRequest={weatherRequest}
 				transition={DEFAULT_TRANSITION}
 			/>
@@ -84,15 +92,8 @@ export default function App() {
 }
 
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-function getWeatherData(location: string, apikey: string): fetchRequest {
-	const [lat, lon] = location.split(',')
-	// eslint-disable-next-line quotes
-	return useFetch(`https://api.openweathermap.org/data/3.0/onecall?lat=${lat}&lon=${lon}&appid=${apikey}&units=metric`)
-}
-
-function getMockData(shouldErr = false): fetchRequest {
-	const [data, setData] = useState<WeatherData>()
+function getMockData(shouldErr = false): FetchRequest<WeatherData> {
+	const [data, setData] = useState<WeatherData | undefined>()
 	const [error, setError] = useState<Error | undefined>(undefined)
 	const [loading, setLoading] = useState<boolean>(true)
 
@@ -104,8 +105,8 @@ function getMockData(shouldErr = false): fetchRequest {
 				setError(new Error('Unable to fetch data.'))
 				return
 			}
-			setData(MockData)
-			console.log(MockData)
+			setData(mockData)
+			console.log(mockData)
 			setLoading(false)
 		}, 1500)
 	}, [])
