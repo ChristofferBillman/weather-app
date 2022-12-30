@@ -1,14 +1,14 @@
 import Wind from '../icons/wind.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
-import { fetchRequest } from '../hooks/useFetch'
+import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData from '../types/WeatherData'
 import Graph, { Point } from './Graph'
 import { useEffect, useState } from 'react'
 
 interface RainDetailProps {
-	weatherRequest: fetchRequest
+	weatherRequest: FetchRequest<WeatherData>
 	transition: Transition
 }
 
