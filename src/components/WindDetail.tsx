@@ -1,4 +1,4 @@
-import Waterdrop from '../icons/waterdrop.svg'
+import Wind from '../icons/wind.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
 import { fetchRequest } from '../hooks/useFetch'
@@ -12,9 +12,9 @@ interface RainDetailProps {
 	transition: Transition
 }
 
-const HUE = 223
+const HUE = 200
 
-export default function RainDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
+export default function WindDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
 	const {data,error,loading} = weatherRequest
 	const typedData: WeatherData = data as WeatherData
 
@@ -29,13 +29,13 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 		for(let i = 0; i < typedData.hourly.length/2; i++) {
 			const currentHour = (firstHourInData + i) % 24
 			let xLabel = ''
-			let rainAmount
+			let wind
 			
-			if(typedData.hourly[i].rain === undefined){
-				rainAmount = 0
+			if(typedData.hourly[i].wind_speed === undefined){
+				wind = 0
 			}
 			else{
-				rainAmount = typedData.hourly[i].rain as number
+				wind = typedData.hourly[i].wind_speed as number
 			}
 
 			if(currentHour <= 9){
@@ -51,12 +51,17 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 			}
 			arr[i] = {
 				x: i,
-				y: rainAmount
+				y: wind
 			}
 		}
 		setRainData(arr)
 		setRainDataLabels(labels)
 	},[])
+
+	const degToDirection = () => {
+		return 0
+	}
+
 	return (
 		<Detail
 			loading={loading}
@@ -65,8 +70,8 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 		>
 			<>
 				<div className='row align-center'>
-					<h1>Percipication</h1>
-					<img src={Waterdrop} className='icon-lg' />
+					<h1>Wind</h1>
+					<img src={Wind} className='icon-lg' />
 				</div>
 				<Graph
 					dataPoints={rainData}
@@ -80,11 +85,26 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 				{error ?
 					error.message
 					:
-					<DataPoint
-						data={typedData?.current.rain ? typedData?.current.rain + 'mm' : '0mm'}
-						dataColor={new hsl(HUE, 100, 40).toString()}
-						label='Now'
-					/>
+					<div className='row' style={{flexWrap: 'wrap', justifyContent: 'space-between', width: '50%', padding: '2rem 0'}}>
+						<DataPoint
+							data={typedData?.current.wind_speed ? typedData?.current.wind_speed + 'm/s' : '0m/s'}
+							dataColor={new hsl(HUE, 100, 40).toString()}
+							label='Current Speed'
+							size='sm'
+						/>
+						<DataPoint
+							data={typedData?.current.wind_deg ? typedData?.current.wind_deg + '°' : '-°'}
+							dataColor={new hsl(HUE, 100, 40).toString()}
+							label='Direction'
+							size='sm'
+						/>
+						<DataPoint
+							data={typedData?.current.wind_gust ? typedData?.current.wind_gust + 'm/s' : '0m/s'}
+							dataColor={new hsl(HUE, 100, 40).toString()}
+							label='Gust'
+							size='sm'
+						/>
+					</div>
 				}
 			</>
 		</Detail>

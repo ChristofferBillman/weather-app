@@ -25,7 +25,7 @@ export default function DebugDetail({ weatherRequest, transition }: DebugDetailP
 				color1={new hsl(HUE,100,50).toString()}
 				color2={new hsl(HUE + 30,100,50).toString()}
 			/>
-			{/*error ? <p>error.message</p> : <code>{JSON.stringify(data, null, 4)}</code>*/}
+			{error ? <p>error.message</p> : <code>{JSON.stringify(data, null, 4)}</code>}
 		</Detail>
 	)
 }

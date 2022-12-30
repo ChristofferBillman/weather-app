@@ -42,7 +42,7 @@ export default function Overview({ weatherRequest, transition, setSelectedDataPo
 			data: typedData?.daily[0].wind_speed + 'm/s',
 			label: 'Wind',
 			icon: Wind,
-			hasSection: DetailSections.DEBUG
+			hasSection: DetailSections.WIND
 		}
 	]
 
@@ -60,7 +60,7 @@ export default function Overview({ weatherRequest, transition, setSelectedDataPo
 						error.message
 						:
 						// eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-						dataPointProps.map((p, index) => <DataPoint key={index} onClick={() => {setSelectedDataPoint(p.hasSection!)}} {...p} />)
+						dataPointProps.map((p, index) => <div key={index} style={{width: '50%'}}><DataPoint onClick={() => {setSelectedDataPoint(p.hasSection!)}} {...p} /></div>)
 					}
 				</div>
 			</TransitionLifecycle>

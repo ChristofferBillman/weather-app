@@ -14,6 +14,7 @@ import * as MockDataUntyped from './MockData.json'
 import * as APIKEY from './ApiKey.json'
 import TemperatureDetail from './components/TemperatureDetail'
 import RainDetail from './components/RainDetail'
+import WindDetail from './components/WindDetail'
 import DebugDetail from './components/DebugDetail'
 import { DetailSections } from './components/DataPoint'
 
@@ -49,6 +50,11 @@ export default function App() {
 			/>
 		case DetailSections.RAIN:
 			return <RainDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
+		case DetailSections.WIND:
+			return <WindDetail
 				weatherRequest={weatherRequest}
 				transition={DEFAULT_TRANSITION}
 			/>
