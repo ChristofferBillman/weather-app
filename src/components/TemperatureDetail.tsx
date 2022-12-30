@@ -2,13 +2,13 @@ import Thermostat from '../icons/thermostat.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
 import Graph, {Point} from './Graph'
-import { fetchRequest } from '../hooks/useFetch'
+import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData, {DailyTemp} from '../types/WeatherData'
 import { useEffect, useState } from 'react'
 
 interface TemperatureDetailProps {
-	weatherRequest: fetchRequest
+	weatherRequest: FetchRequest<WeatherData>
 	transition: Transition
 }
 
@@ -34,7 +34,7 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 			const currentHour = (firstHourInData + i) % 24
 			let xLabel = ''
 
-			if(currentHour <= 9){
+			if(currentHour <= 9) {
 				xLabel = '0' + currentHour
 			}
 			else{
