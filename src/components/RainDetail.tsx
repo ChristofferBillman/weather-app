@@ -1,20 +1,27 @@
 import Waterdrop from '../icons/waterdrop.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
-import { fetchRequest } from '../hooks/useFetch'
+import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData from '../types/WeatherData'
+import { type } from '@testing-library/user-event/dist/type'
 
 interface RainDetailProps {
-	weatherRequest: fetchRequest
+	weatherRequest: FetchRequest<WeatherData>
 	transition: Transition
 }
 
 const HUE = 223
 
-export default function TemperatureDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
+export default function RainDetail({ weatherRequest, transition }: RainDetailProps): JSX.Element {
 	const {data,error,loading} = weatherRequest
 	const typedData: WeatherData = data as WeatherData
+
+	let rainAmount: number | unknown= typedData.current.rain
+	if(typedData?.current.rain == undefined) {
+		rainAmount = 0
+	}
+
 	return (
 		<Detail
 			loading={loading}
@@ -30,7 +37,7 @@ export default function TemperatureDetail({ weatherRequest, transition }: RainDe
 					error.message
 					:
 					<DataPoint
-						data={typedData?.current.temp + '°C'}
+						data={rainAmount + ' mm'}
 						dataColor={new hsl(HUE, 100, 40).toString()}
 						label='Now'
 					/>
