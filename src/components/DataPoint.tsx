@@ -48,3 +48,14 @@ export default function DataPoint({ data, label, icon, dataColor, labelColor, si
 		</div>
 	)
 }
+
+function getContainerClass(size: string | undefined) {
+	switch(size){
+	case 'lg':
+		return 'datapoint-container'
+	case 'sm':
+		return 'datapoint-container datapoint-sm'
+	default:
+		return 'datapoint-container'
+	}
+}
