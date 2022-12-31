@@ -63,6 +63,11 @@ export default function App() {
 				weatherRequest={weatherRequest}
 				transition={DEFAULT_TRANSITION}
 			/>
+		case DetailSections.HUMIDITY:
+			return <HumidityDetail
+				weatherRequest={weatherRequest}
+				transition={DEFAULT_TRANSITION}
+			/>
 		default:
 			return <DebugDetail
 				weatherRequest={weatherRequest}

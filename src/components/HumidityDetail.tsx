@@ -1,12 +1,16 @@
 import HumidityIcon from '../icons/humidity.svg'
 import DataPoint from './DataPoint'
 import Detail,{hsl} from './Detail'
-import Graph, {Point} from './Graph'
+import Graph from './Graph'
 import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
-import WeatherData, { DailyTemp } from '../types/WeatherData'
-import { useEffect, useState } from 'react'
+import WeatherData, { Info } from '../types/WeatherData'
+import { useState } from 'react'
 import HorizonalRadioSelection from './HorizonalRadioSelection'
+import Point from '../types/Point'
+import VSpace from './VSpace'
+import Size from '../types/Size'
+import timeLabels from '../types/TimeLabel'
 
 interface TemperatureDetailProps {
 	weatherRequest: FetchRequest<WeatherData>
@@ -15,83 +19,29 @@ interface TemperatureDetailProps {
 
 export default function HumidityDetail({ weatherRequest, transition }: TemperatureDetailProps): JSX.Element {
 	const {data, error, loading} = weatherRequest
-	const typedData: WeatherData = data as WeatherData
+	const weatherData: WeatherData = data as WeatherData
 
 	const [selection, setSelection] = useState<string>('Relative')
 
-	useEffect(() => {
-		if(selection == 'Relative') {
-			// ok
-		} else {
-			// 
-		}
-	},[selection])
+	const humRelData = getHumidityPerHour(weatherData)
 
-	// Remove all decimals after first one and cast to int.
-	const humitities: number[] = []
-	const absHumidities: number[] = []
+	const yLabels: [number,string][] = [
+		[0, '0 %'],
+		[25, '25 %'],
+		[50, '50 %'],
+		[75, '75 %'],
+		[100, '100 %']
+	]
 
-	typedData.hourly.forEach(hour => {
-		humitities.push(hour.humidity == undefined ? 0 : hour.humidity)
-		absHumidities.push(relativeToAbsolute(hour.humidity == undefined ? 0 : hour.humidity, Number((((typedData?.daily[0].temp as DailyTemp).day) as number).toFixed(1))))
-	})
-	const current = typedData?.current.humidity as number
-	const max = Math.max(...humitities)
-	const min = Math.min(...humitities)
-	const avg = Math.floor(humitities.reduce((prev,current) => prev += current) / humitities.length)
-	const avgAbs = Math.floor(absHumidities.reduce((prev,current) => prev += current) / absHumidities.length)
+	const current = weatherData?.current.humidity
+	if(current == undefined) throw new Error('No current humidity found.')
 
+	const humidities = humRelData.map((p: Point) => p.y)
+	const max = Math.max(...humidities)
+	const min = Math.min(...humidities)
+	const avg = Math.floor(getAvg(humidities))
 
-	const [humRelData, setHumRelData] = useState<Point[]>([])
-	const [humAbsData, setHumAbsData] = useState<Point[]>([])
-
-	const [relLabels, setRelLabels] = useState<{x: string, y: string}[]>([])
-	const [absLabels, setAbsLabels] = useState<{x: string, y: string}[]>([])
-
-
-	useEffect(() =>{
-		const relHum: Point[] = []
-		const absHum: Point[] = []
-		const relLabels = []
-		const absLabels = []
-		const firstHourInData = new Date((typedData.hourly[0].dt + typedData.timezone_offset)*1000).getHours()
-
-		for(let i = 0; i < typedData.hourly.length/2; i++) {
-			const currentHour = (firstHourInData + i) % 24
-			let xLabel = ''
-
-			if(currentHour <= 9) {
-				xLabel = '0' + currentHour
-			}
-			else{
-				xLabel = String(currentHour)
-			}
-			relLabels[i] = {
-				x: xLabel,
-				y: String(Math.ceil(typedData.hourly[i].humidity as number))
-			}
-			relHum[i] = {
-				x: i,
-				y: typedData.hourly[i].humidity as number
-			}
-
-			const absHumVal = relativeToAbsolute(typedData.hourly[i].humidity as number, typedData.hourly[i].temp as number)
-			absLabels[i] = {
-				x: xLabel,
-				y: String(Math.ceil(absHumVal))
-			}
-			absHum[i] = {
-				x: i,
-				y: relativeToAbsolute(typedData.hourly[i].humidity as number, typedData.hourly[i].temp as number)
-			}
-		}
-		setHumRelData(relHum)
-		setHumAbsData(absHum)
-		setRelLabels(relLabels)
-		setAbsLabels(absLabels)
-
-		console.log(absHum)
-	},[])
+	if(error) return <p>error.message</p>
 	
 	return (
 		<Detail
@@ -104,65 +54,64 @@ export default function HumidityDetail({ weatherRequest, transition }: Temperatu
 					<h1>Humidity</h1>
 					<img src={HumidityIcon} className='icon-lg' />
 				</div>
-				{error ?
-					error.message
-					:
-					<>
-						{selection == 'Relative' ? (
-							<Graph
-								dataPoints={ humRelData}
-								axisOptions={{labels: relLabels, boundY: [0,100]}}
-								color2={new hsl(humidityToHue(max),100,50).toString()}
-								color1={new hsl(humidityToHue(min),100,50).toString()}
-							/>
-						) : (
-							<Graph
-								dataPoints={humAbsData}
-								axisOptions={{labels: absLabels, boundY: [0,20]}}
-								color2={new hsl(humidityToHue(max),100,50).toString()}
-								color1={new hsl(humidityToHue(min),100,50).toString()}
-							/>
-						)}
-						
-						<div className='vspace'/>
-						<HorizonalRadioSelection
-							items={['Relative', 'Absolute']}
-							selection={selection}
-							setSelection={setSelection}
-							hue={humidityToHue(avg)}
+				
+				<Graph
+					dataPoints={humRelData}
+					axisOptions={{xLabels: timeLabels, yLabels,boundY: [0,100], boundX: [0,24]}}
+					color2={new hsl(humidityToHue(max),100,50).toString()}
+					color1={new hsl(humidityToHue(min),100,50).toString()}
+				/>
+				
+				<VSpace height={Size.SINGLE}/>
+
+				<HorizonalRadioSelection
+					items={['Relative', 'Absolute']}
+					selection={selection}
+					setSelection={setSelection}
+					hue={humidityToHue(avg)}
+				/>
+				<div className='row'>
+					<DataPoint
+						data={current + ' %'}
+						dataColor={new hsl(humidityToHue(current), 100, 40).toString()}
+						label='Now'
+					/>
+					<div className='row'>
+						<DataPoint
+							data={max + ' %'}
+							label='Max'
+							size='sm'
+							dataColor={new hsl(humidityToHue(max), 100,40).toString()}
 						/>
 						<DataPoint
-							data={current + ' %'}
-							dataColor={new hsl(humidityToHue(current), 100, 40).toString()}
-							label='Now'
+							data={min + ' %'}
+							label='Min'
+							size='sm'
+							dataColor={new hsl(humidityToHue(min), 100,40).toString()}
 						/>
-						<div className='row'>
-							<DataPoint
-								data={max + ' %'}
-								label='Max'
-								size='sm'
-								dataColor={new hsl(humidityToHue(max), 100,40).toString()}
-							/>
-							<DataPoint
-								data={min + ' %'}
-								label='Min'
-								size='sm'
-								dataColor={new hsl(humidityToHue(min), 100,40).toString()}
-							/>
-							<DataPoint
-								data={selection == 'Relative' ? avg + ' %' : avgAbs + ' g/m^3'}
-								label='Avg'
-								size='sm'
-								dataColor={new hsl(humidityToHue(avg), 100,40).toString()}
-							/>
-						</div>
-					</>
-				}
+						<DataPoint
+							data={avg + ' %'}
+							label='Avg'
+							size='sm'
+							dataColor={new hsl(humidityToHue(avg), 100,40).toString()}
+						/>
+					</div>
+				</div>
 			</>
 		</Detail>
 	)
 }
 
+function getAvg(arr: number[]) {
+	return arr.reduce((prev,current) => prev += current) / arr.length
+}
+function getHumidityPerHour(weatherData: WeatherData): Point[] {
+	return weatherData.hourly.map((hour: Info, index: number) => {
+		return new Point(index,hour.humidity == undefined ? 0 : hour.humidity)
+	})
+}
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function relativeToAbsolute(relative: number, temp: number) {
 	// Accurate to 0.1% in range -30 deg C to 35 deg C.
 	return (6.112 * Math.pow(Math.E, (17.67 * temp)/(temp+243.5)) * relative * 2.1674) / (273.15 + temp)
