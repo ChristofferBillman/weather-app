@@ -72,9 +72,8 @@ html {
 	width: 100%;
 }
 
-.graph-label {
-	color: var(--grey);
-	font-size: 1rem;
+.graph-line {
+	stroke:rgba(173, 173, 173, 0.315);
 }
 
 .horizontal-radio-selection-container{
