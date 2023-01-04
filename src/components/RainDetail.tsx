@@ -7,6 +7,7 @@ import WeatherData, { Info } from '../types/WeatherData'
 import Graph from './Graph'
 import timeLabels from '../types/TimeLabel'
 import Point from '../types/Point'
+import TimeLabels from '../types/TimeLabel'
 
 interface RainDetailProps {
 	weatherRequest: FetchRequest<WeatherData>
@@ -28,6 +29,8 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 		[75, '75 %'],
 		[100, '100 %']
 	]
+
+	const xLabels = TimeLabels.getLabels(3,0,24)
 
 	const currentRainAmount = getCurrentRainAmount(weatherData)
 
@@ -51,7 +54,7 @@ export default function RainDetail({ weatherRequest, transition }: RainDetailPro
 					color2={new hsl(HUE, 20, 60).toString()}
 					axisOptions={{
 						yLabels,
-						xLabels: timeLabels,
+						xLabels,
 						boundY: [0,25]
 					}}
 				/>

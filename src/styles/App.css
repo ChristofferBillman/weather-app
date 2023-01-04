@@ -24,7 +24,11 @@ html {
 .detail-container {
 	grid-area: right;
 	padding: 8rem;
+	box-sizing: border-box;
 	width: 50vw;
+}
+.detail-content-container{
+	width: 600px;
 }
 
 .datapoints-container {
@@ -48,6 +52,7 @@ html {
 .row {
 	display: flex;
 	flex-direction: row;
+	flex-wrap: wrap;
 }
 
 .align-center {
@@ -88,10 +93,10 @@ html {
 	display: flex;
 	padding: 0 32px 0 32px;
 	border-radius: 100px;
-	transition-duration: 200ms;
+	transition-duration: 500ms;
 }
 .selected {
-	transition-duration: 200ms;
+	transition-duration: 500ms;
 	background-color: rgba(150, 255, 253, 0.592);
 }
 .vspace{
@@ -100,10 +105,20 @@ html {
 /* Mobile media queries */
 @media (max-width: 768px) {
 	.app-container {
-		margin: 0.5rem;
 		grid-template-columns: 1fr;
 		grid-template-areas:
 			"left"
 			"right";
+	}
+	.detail-container {
+		grid-area: right;
+		padding: 0.5rem;
+		box-sizing: border-box;
+		width: 100vw;
+	}
+	.overview-container {
+		grid-area: left;
+		padding: 0.5rem;
+		display: block;
 	}
 }

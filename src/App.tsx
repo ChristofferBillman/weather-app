@@ -38,9 +38,9 @@ export default function App() {
 
 	const [lat, lon] = UMEA.split(',')
 
-	const url = `https://api.openweathermap.org/data/3.0/onecall?lat=${lat as string}&lon=${lon as string}&appid=${APIKEY}&units=metric`
+	const url = `https://api.openweathermap.org/data/3.0/onecall?&exclude=minutely&lat=${lat as string}&lon=${lon as string}&appid=${APIKEY}&units=metric`
 	//console.log(url)
-	const weatherRequest = getMockData() //useFetch<any>(url)
+	const weatherRequest = getMockData()//useFetch<WeatherData>(url)
 
 	useEffect(() => {
 		setRenderPage(true)

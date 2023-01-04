@@ -5,12 +5,12 @@ import Graph from './Graph'
 import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
 import WeatherData, { Info } from '../types/WeatherData'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import HorizonalRadioSelection from './HorizonalRadioSelection'
 import Point from '../types/Point'
 import VSpace from './VSpace'
 import Size from '../types/Size'
-import timeLabels from '../types/TimeLabel'
+import TimeLabels from '../types/TimeLabel'
 
 interface TemperatureDetailProps {
 	weatherRequest: FetchRequest<WeatherData>
@@ -22,24 +22,64 @@ export default function HumidityDetail({ weatherRequest, transition }: Temperatu
 	const weatherData: WeatherData = data as WeatherData
 
 	const [selection, setSelection] = useState<string>('Relative')
+	
+	const isRelative = () => selection == 'Relative'
 
+	const date = new Date((weatherData.hourly[0].dt + weatherData.timezone_offset) * 1000)
+	const startHour = date.getHours()
+
+	const xLabels = TimeLabels.getLabels(3,startHour, startHour + 24)
+
+	const tempPerHour = getTempPerHour(weatherData)
 	const humRelData = getHumidityPerHour(weatherData)
 
-	const yLabels: [number,string][] = [
-		[0, '0 %'],
-		[25, '25 %'],
-		[50, '50 %'],
-		[75, '75 %'],
-		[100, '100 %']
-	]
-
 	const current = weatherData?.current.humidity
-	if(current == undefined) throw new Error('No current humidity found.')
 
-	const humidities = humRelData.map((p: Point) => p.y)
-	const max = Math.max(...humidities)
-	const min = Math.min(...humidities)
-	const avg = Math.floor(getAvg(humidities))
+	let humData, max, min, avg
+	let yLabels  : [number, string][]
+	let boundY   : [number, number]
+	const boundX : [number, number] = [0,24]
+
+	/* RELATIVE DATA */
+	if(isRelative()) {
+		console.log('got inside!')
+		const humidities = humRelData.map((p: Point) => p.y)
+		humData = humRelData
+
+		max = Math.max(...humidities)
+		min = Math.min(...humidities)
+		avg = Math.floor(getAvg(humidities))
+
+		yLabels = [
+			[0, '0 %'],
+			[25, '25 %'],
+			[50, '50 %'],
+			[75, '75 %'],
+			[100, '100 %']
+		]
+		boundY = [0,100]
+	}
+	/* ABSOLUTE DATA */
+	else {
+		humData =  humRelData.map((p: Point, i: number) => new Point(i, relativeToAbsolute(p.y,tempPerHour[i].y)))
+		const humiditiesAbs = humData.map((p: Point) => p.y)
+
+		max = Math.max(...humiditiesAbs)
+		min = Math.min(...humiditiesAbs)
+		avg = Math.floor(getAvg(humiditiesAbs))
+
+		yLabels = [
+			[0      , '0'],
+			[min    , min.toFixed(1) + ' g/m3'],
+			[avg    , String(avg.toFixed(1))],
+			[max    , String(max.toFixed(1))],
+			[max + 2, String((max+2).toFixed(1))],
+			[max + 2, String(max+2)]
+		]
+		boundY = [min-1,max+1]
+	}
+
+	if(current == undefined) throw new Error('No current humidity found.')
 
 	if(error) return <p>error.message</p>
 	
@@ -54,46 +94,45 @@ export default function HumidityDetail({ weatherRequest, transition }: Temperatu
 					<h1>Humidity</h1>
 					<img src={HumidityIcon} className='icon-lg' />
 				</div>
-				
-				<Graph
-					dataPoints={humRelData}
-					axisOptions={{xLabels: timeLabels, yLabels,boundY: [0,100], boundX: [0,24]}}
-					color2={new hsl(humidityToHue(max),100,50).toString()}
-					color1={new hsl(humidityToHue(min),100,50).toString()}
-				/>
-				
-				<VSpace height={Size.SINGLE}/>
+				<div className='detail-content-container'>
+					<Graph
+						dataPoints={humData}
+						axisOptions={{xLabels, yLabels, boundY, boundX}}
+						color2={new hsl(humidityToHue(100),100,50).toString()}
+						color1={new hsl(humidityToHue(0),100,50).toString()}
+					/>
+					
+					<VSpace height={Size.SINGLE}/>
 
-				<HorizonalRadioSelection
-					items={['Relative', 'Absolute']}
-					selection={selection}
-					setSelection={setSelection}
-					hue={humidityToHue(avg)}
-				/>
-				<div className='row'>
-					<DataPoint
-						data={current + ' %'}
-						dataColor={new hsl(humidityToHue(current), 100, 40).toString()}
-						label='Now'
+					<HorizonalRadioSelection
+						items={['Relative', 'Absolute']}
+						selection={selection}
+						setSelection={setSelection}
+						hue={humidityToHue(current)}
 					/>
 					<div className='row'>
 						<DataPoint
-							data={max + ' %'}
+							data={isRelative() ? current + ' %' : 'N/A'}
+							dataColor={new hsl(humidityToHue(current), 100, 40).toString()}
+							label='Now'
+						/>
+						<DataPoint
+							data={max.toFixed(1) + (isRelative() ? ' %' : ' g/m3')}
 							label='Max'
 							size='sm'
-							dataColor={new hsl(humidityToHue(max), 100,40).toString()}
+							dataColor={new hsl(humidityToHue(current), 100,40).toString()}
 						/>
 						<DataPoint
-							data={min + ' %'}
+							data={min.toFixed(1) + (isRelative() ? ' %' : ' g/m3')}
 							label='Min'
 							size='sm'
-							dataColor={new hsl(humidityToHue(min), 100,40).toString()}
+							dataColor={new hsl(humidityToHue(current), 100,40).toString()}
 						/>
 						<DataPoint
-							data={avg + ' %'}
+							data={avg.toFixed(1) + (isRelative() ? ' %' : ' g/m3')}
 							label='Avg'
 							size='sm'
-							dataColor={new hsl(humidityToHue(avg), 100,40).toString()}
+							dataColor={new hsl(humidityToHue(current), 100,40).toString()}
 						/>
 					</div>
 				</div>
@@ -115,6 +154,12 @@ function getHumidityPerHour(weatherData: WeatherData): Point[] {
 function relativeToAbsolute(relative: number, temp: number) {
 	// Accurate to 0.1% in range -30 deg C to 35 deg C.
 	return (6.112 * Math.pow(Math.E, (17.67 * temp)/(temp+243.5)) * relative * 2.1674) / (273.15 + temp)
+}
+
+function getTempPerHour(weatherData: WeatherData): Point[] {
+	return weatherData.hourly.map((hour: Info, index: number) => {
+		return new Point(index, hour.temp == undefined ? 0 : hour.temp as number)
+	})
 }
 
 function humidityToHue(humidity: number): number{

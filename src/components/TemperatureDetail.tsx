@@ -4,8 +4,9 @@ import Detail,{hsl} from './Detail'
 import Graph from './Graph'
 import { FetchRequest } from '../hooks/useFetch'
 import {Transition} from './TransitionLifecycle'
-import WeatherData, {DailyTemp, Info} from '../types/WeatherData'
+import WeatherData, {Info} from '../types/WeatherData'
 import Point from '../types/Point'
+import TimeLabel from '../types/TimeLabel'
 
 interface TemperatureDetailProps {
 	weatherRequest: FetchRequest<WeatherData>
@@ -16,14 +17,24 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 	const {data,error, loading} = weatherRequest
 	const weatherData: WeatherData = data as WeatherData
 
-	// Remove all decimals after first one and cast to int.
-	const min = Number((((weatherData?.daily[0].temp as DailyTemp).min) as number).toFixed(1))
-	const avg = Number((((weatherData?.daily[0].temp as DailyTemp).day) as number).toFixed(1))
-	const max = Number((((weatherData?.daily[0].temp as DailyTemp).max) as number).toFixed(1))
+	const tempData = getTempPerHour(weatherData)
+
+	const min = getMinTemp(tempData)
+	const avg = getAvgTemp(tempData)
+	const max = getMaxTemp(tempData)
 	const current = weatherData?.current.temp as number
 
-	const tempData = getTempPerHour(weatherData)
-	console.log(tempData)
+	const yLabels: [number,string][] = [
+		[min-5, String(min-5)],
+		[min, String(min)],
+		[max, String(max)],
+		[max + 5, String(max+5)]
+	]
+
+	const date = new Date((weatherData.hourly[0].dt + weatherData.timezone_offset) * 1000)
+	const startHour = date.getHours()
+
+	const xLabels = TimeLabel.getLabels(3,startHour, startHour + 24)
 
 	if(error) return <p>{error.message}</p>
 	
@@ -42,28 +53,28 @@ export default function TemperatureDetail({ weatherRequest, transition }: Temper
 					dataPoints={tempData}
 					color2={new hsl(tempToHue(max),100,50).toString()}
 					color1={new hsl(tempToHue(min),100,50).toString()}
-					axisOptions={{boundY: [7,30]}}
-				/>
-				<DataPoint
-					data={current + '°C'}
-					dataColor={new hsl(tempToHue(current), 100, 40).toString()}
-					label='Now'
+					axisOptions={{xLabels, yLabels, boundX: [0,24], boundY: [min-5, max+5]}}
 				/>
 				<div className='row'>
 					<DataPoint
-						data={max + '°C'}
+						data={current + '°C'}
+						dataColor={new hsl(tempToHue(current), 100, 40).toString()}
+						label='Now'
+					/>
+					<DataPoint
+						data={max.toFixed(1) + '°C'}
 						label='Max'
 						size='sm'
 						dataColor={new hsl(tempToHue(max), 100,40).toString()}
 					/>
 					<DataPoint
-						data={min + '°C'}
+						data={min.toFixed(1) + '°C'}
 						label='Min'
 						size='sm'
 						dataColor={new hsl(tempToHue(min), 100,40).toString()}
 					/>
 					<DataPoint
-						data={avg + '°C'}
+						data={avg.toFixed(1) + '°C'}
 						label='Avg'
 						size='sm'
 						dataColor={new hsl(tempToHue(avg), 100,40).toString()}
@@ -82,6 +93,19 @@ function tempToHue(temp: number): number{
 
 function getTempPerHour(weatherData: WeatherData): Point[] {
 	return weatherData.hourly.map((hour: Info, index: number) => {
-		return new Point(index,hour.temp == undefined ? 0 : hour.temp as number)
+		return new Point(index, hour.temp == undefined ? 0 : hour.temp as number)
 	})
+}
+function roundToMultipleOf3(n: number) {
+	return 3.0*Math.ceil(n/3.0)
+}
+function getAvgTemp(arr: Point[]) {
+	const yValues = arr.map(hour => hour.y)
+	return yValues.reduce((prev,current) => prev += current) / yValues.length
+}
+function getMinTemp(arr: Point[]) {
+	return Math.min(...arr.map(hour => hour.y))
+}
+function getMaxTemp(arr: Point[]) {
+	return Math.max(...arr.map(hour => hour.y))
 }

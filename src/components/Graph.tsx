@@ -1,3 +1,4 @@
+import { useLayoutEffect } from 'react'
 import Point from '../types/Point'
 
 interface GraphProps {
@@ -18,10 +19,10 @@ interface AxisOptions {
 //       Negative values are not reflected in graph. Min is 0 apperently. FIXED.
 //       Rework this shit so x and y labels can be independent of each other. FIXED.
 //       Auto generate labels when omitted.
-//       Graph shows up outside svg when above a certain value. > 6 for mock temp data.
+//       Graph shows up outside svg when above a certain value. > 6 for mock temp data. FIXED.
 
-const HEIGHT = 256 + 30
-const WIDTH = HEIGHT * 2
+let HEIGHT = 312
+let WIDTH = HEIGHT * 2
 // dataPoints / LINES is the number of lines shown.
 
 export default function Graph({dataPoints, axisOptions, color1, color2}: GraphProps) {
@@ -39,6 +40,13 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 	if(boundX === undefined) boundX = generateBounds(dataPoints.map(p => p.x))
 	// If boundY is not specified.
 	if(boundY === undefined) boundY = generateBounds(dataPoints.map(p => p.y))
+
+	// Make fit graph to viewport width if on mobile.
+	useLayoutEffect(() => {
+		if(window.innerWidth > 768) return
+		WIDTH = window.innerWidth-10
+		HEIGHT = WIDTH / 2
+	})
 
 	/**
 	 * Draws SVG for the graph.
@@ -91,7 +99,7 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 		const xLabelElements = xLabels.map((label: [number, string]) => (
 			<text
 				key={label[1]}
-				x={xToPx(label[0])}
+				x={xToPx(label[0])+5}
 				y={HEIGHT}
 				fill='gray'
 				className='graph-label'
@@ -134,10 +142,10 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 
 		// Set default labels if they weren't provided.
 		if(xLabels == undefined) {
-			xLabels = [[0, '0']]
+			xLabels = [[0, '0'], [4, '4'], [23, '5'],[6, '6']]
 		}
 		if(yLabels == undefined) {
-			yLabels = [[0, '0']]
+			yLabels = [[0, '0'], [4,'4']]
 		}
 
 		const xLines= xLabels.map((label: [number, string]) => (
@@ -268,9 +276,9 @@ export default function Graph({dataPoints, axisOptions, color1, color2}: GraphPr
 		// Convert coordinate step to pixels.
 		const dy = HEIGHT / Math.abs(boundY[0] - boundY[1])
 		// Offset beginning of graph to 0 when coordinates are negative.
-		const nOffsetY = Math.abs(boundY[0])*dy
+		const nOffsetY = boundY[0]*dy
 		// This calculation is wrong, at least for Y. Negative points go outside.
-		return HEIGHT - ((y * dy) + nOffsetY)
+		return HEIGHT - (y * dy) + nOffsetY
 	}
 
 	return (

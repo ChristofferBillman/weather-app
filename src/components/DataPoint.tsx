@@ -37,14 +37,14 @@ export default function DataPoint({ data, label, icon, dataColor, labelColor, si
 				</h3>
 				<img src={icon} className='icon-sm' />
 			</div>
-			<h1
+			<h2
 				style={{
 					color: dataColor,
-					fontSize: size === 'lg' ? '4rem' : '3rem'
+					//fontSize: size === 'lg' ? '4rem' : '3rem'
 				}}
 			>
 				{data === undefined ? 'N/A' : data}
-			</h1>
+			</h2>
 		</div>
 	)
 }
